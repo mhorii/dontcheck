@@ -7,7 +7,7 @@
 ####
 DEFAULT_PASSWORD=""
 DEFALUT_PI_HOLE=""
-
+COOKIE="./cookie.txt"
 
 ####
 #
@@ -33,11 +33,8 @@ function urlencode () {
 #
 ####
 
-
 # Login
 function login () {
-    # curl -o /dev/null -w '%{http_code}\n' -X POST http://${PI_HOLE}/admin/index.php?login= -d "pw=${PASSWORD}" -s -c ${COOKIE}
-    echo $COOKIE
     curl -o /dev/null -X POST http://${PI_HOLE}/admin/index.php?login= -d "pw=${PASSWORD}" -d "persistentlogin=on" -s -c ${COOKIE}
 }
 
@@ -54,6 +51,8 @@ function get_token () {
 # Add a domain in blacklist
 function add () {
     domain="${1}"
+
+    token=$(get_token)    
     
     curl  -b ${COOKIE} -X POST http://${PI_HOLE}/admin/scripts/pi-hole/php/groups.php -d "action=add_domain" -d "domain=${domain}" -d "type=1" -d "comment=" -d "token=${token}"
 }
@@ -61,14 +60,17 @@ function add () {
 # Delete a domain from the blacklist
 function delete () {
     id="${1}"
+
+    token=$(get_token)    
+    
     curl -b ${COOKIE} -X POST http://${PI_HOLE}/admin/scripts/pi-hole/php/groups.php -d "action=delete_domain" -d "id=${id}" -d "token=${token}" -s
 }
 
 # Get blacklist
 function list () {
-    curl -b ${COOKIE} -X POST http://${PI_HOLE}/admin/scripts/pi-hole/php/groups.php -d "action=get_domains" -d "showtype=black" -d "token=${token}"
-    # curl -b ${COOKIE} -X POST http://${PI_HOLE}/admin/scripts/pi-hole/php/groups.php -d "action=get_domains" -d "showtype=black" -d "token=${token}" -s
+    token=$(get_token)
     
+    curl -b ${COOKIE} -X POST http://${PI_HOLE}/admin/scripts/pi-hole/php/groups.php -d "action=get_domains" -d "showtype=black" -d "token=${token}" -s
 }
 
 # logout
@@ -84,14 +86,7 @@ function clean () {
 function lookup () {
     domain="${1}"
     ret=$(list)
-    # echo $ret
-    
-    # echo "${ret}" | jq . | grep -B 3 -e "${domain}" | grep -e "id" | sed -e 's/ //g' -e 's/\"id\"://g' -e 's/,//'
 
-
-
-    # echo "${ret}" | jq '.data[] | {id: .id, domain: .domain}'  #| grep -e "id" | sed -e 's/ //g' -e 's/\"id\"://g' -e 's/,//'
-    # echo $ret
     echo "${ret}" | jq ".data[] | select(.domain == \"${domain}\") | .id"
 }
 
@@ -120,19 +115,12 @@ if [ -z "${PASSWORD}" ]; then
     exit -1
 fi
 
-# COOKIE=$(mktemp)
-COOKIE="./cookie.txt"
 command=${1}
 
 if [ -z "${command}" ]; then
     usage
     exit -1
 fi
-
-# login
-token=$(get_token)
-
-# echo $token
 
 case ${command} in
     "add")
