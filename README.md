@@ -25,7 +25,7 @@ When staring Dontcheck, you can/need to set some values:
   - Default: `9000`
 
 
-`service.sh` is a script for that. See it for more detail. You need to build an image for Dontcheck and start a container with the image.
+`service.sh` is a script for setup. See it for more detail. You need to build an image for Dontcheck and start a container with the image.
 ```
 $ ./service.sh build
 $ PI_HOLE=192.168.0.2:8080 PASSWORD=YOURPASSWORD ./service.sh start
