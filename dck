@@ -5,8 +5,8 @@
 # Config
 #
 ####
-DEFAULT_PASSWORD=""
 DEFALUT_PI_HOLE=""
+DEFAULT_PASSWORD=""
 COOKIE="./cookie.txt"
 
 ####
@@ -59,9 +59,11 @@ function add () {
 
 # Delete a domain from the blacklist
 function delete () {
-    id="${1}"
+    domain="${1}"
 
-    token=$(get_token)    
+    token=$(get_token)
+
+    id=$(lookup $domain)
     
     curl -b ${COOKIE} -X POST http://${PI_HOLE}/admin/scripts/pi-hole/php/groups.php -d "action=delete_domain" -d "id=${id}" -d "token=${token}" -s
 }
@@ -152,6 +154,10 @@ case ${command} in
 	;;
     "logout")
 	logout
+	clean
+	;;
+    "get_token")
+	get_token
 	;;
     "clean")
 	clean
