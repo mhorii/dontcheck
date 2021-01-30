@@ -60,7 +60,8 @@ function add_domain () {
 
 # Delete a domain from the blacklist
 function delete_domain () {
-    curl -b ${COOKIE} -X POST http://${PI_HOLE}/admin/scripts/pi-hole/php/groups.php -d "action=get_domains" -d "showtype=black" -d "token=${token}" -s
+    id="${1}"
+    curl -b ${COOKIE} -X POST http://${PI_HOLE}/admin/scripts/pi-hole/php/groups.php -d "action=delete_domain" -d "id=${id}" -d "token=${token}" -s
 }
 
 # Get blacklist
@@ -140,6 +141,13 @@ case ${command} in
 	    exit -1
 	fi 
 	add_domain "${2}"
+	;;
+    "delete_domain")
+	if [ -z "${2}" ]; then
+	    usage
+	    exit -1
+	fi 
+	delete_domain "${2}"
 	;;
     "get_blacklist")
 	get_blacklist 
