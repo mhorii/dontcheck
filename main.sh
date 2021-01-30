@@ -52,20 +52,20 @@ function get_token () {
 }
 
 # Add a domain in blacklist
-function add_domain () {
+function add () {
     domain="${1}"
     
     curl  -b ${COOKIE} -X POST http://${PI_HOLE}/admin/scripts/pi-hole/php/groups.php -d "action=add_domain" -d "domain=${domain}" -d "type=1" -d "comment=" -d "token=${token}"
 }
 
 # Delete a domain from the blacklist
-function delete_domain () {
+function delete () {
     id="${1}"
     curl -b ${COOKIE} -X POST http://${PI_HOLE}/admin/scripts/pi-hole/php/groups.php -d "action=delete_domain" -d "id=${id}" -d "token=${token}" -s
 }
 
 # Get blacklist
-function get_blacklist () {
+function list () {
     curl -b ${COOKIE} -X POST http://${PI_HOLE}/admin/scripts/pi-hole/php/groups.php -d "action=get_domains" -d "showtype=black" -d "token=${token}"
     # curl -b ${COOKIE} -X POST http://${PI_HOLE}/admin/scripts/pi-hole/php/groups.php -d "action=get_domains" -d "showtype=black" -d "token=${token}" -s
     
@@ -81,9 +81,9 @@ function clean () {
     rm ${COOKIE}
 }
 
-function lookup_domain () {
+function lookup () {
     domain="${1}"
-    ret=$(get_blacklist)
+    ret=$(list)
     # echo $ret
     
     # echo "${ret}" | jq . | grep -B 3 -e "${domain}" | grep -e "id" | sed -e 's/ //g' -e 's/\"id\"://g' -e 's/,//'
@@ -135,29 +135,29 @@ token=$(get_token)
 # echo $token
 
 case ${command} in
-    "add_domain")
+    "add")
 	if [ -z "${2}" ]; then
 	    usage
 	    exit -1
 	fi 
-	add_domain "${2}"
+	add "${2}"
 	;;
-    "delete_domain")
+    "delete")
 	if [ -z "${2}" ]; then
 	    usage
 	    exit -1
 	fi 
-	delete_domain "${2}"
+	delete "${2}"
 	;;
-    "get_blacklist")
-	get_blacklist 
+    "list")
+	list 
 	;;
-    "lookup_domain")
+    "lookup")
 	if [ -z "${2}" ]; then
 	    usage
 	    exit -1
 	fi 
-	lookup_domain "${2}"
+	lookup "${2}"
 	;;
     "login")
 	login
